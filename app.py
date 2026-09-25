@@ -59,9 +59,13 @@ st.markdown(
 }
 
 .block-container {
-    padding-top: 2rem;
+    padding-top: 0.8rem;
     padding-bottom: 4rem;
     max-width: 1450px;
+}
+
+header[data-testid="stHeader"] {
+    background: transparent;
 }
 
 
@@ -85,9 +89,46 @@ section[data-testid="stSidebar"] h3 {
 }
 
 section[data-testid="stSidebar"] .stRadio label {
-    padding: 10px 12px;
-    border-radius: 10px;
-    transition: 0.2s ease;
+    padding: 12px 14px;
+    margin: 6px 0;
+    border-radius: 12px;
+
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+section[data-testid="stSidebar"] .stRadio label:hover {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    transform: translateX(2px);
+}
+
+section[data-testid="stSidebar"] .stRadio label p {
+    font-weight: 600 !important;
+    color: #374151 !important;
+}
+
+/* Selected navigation option */
+section[data-testid="stSidebar"] .stRadio label:has(input:checked) {
+    background: #eef2ff !important;
+    border: 1px solid #6366f1 !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.10);
+}
+
+section[data-testid="stSidebar"] .stRadio label:has(input:checked) p {
+    color: #4338ca !important;
+    font-weight: 700 !important;
+}
+
+/* Keep sidebar title and headings dark */
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {
+    color: #111827 !important;
+}
 }
 
 
@@ -101,7 +142,7 @@ section[data-testid="stSidebar"] .stRadio label {
         #111827 0%,
         #312e81 55%,
         #4338ca 100%
-    );
+    ) !important;
 
     padding: 38px 42px;
     border-radius: 24px;
@@ -155,6 +196,67 @@ section[data-testid="stSidebar"] .stRadio label {
     gap: 10px;
     flex-wrap: wrap;
     margin-top: 22px;
+}
+
+.hero-features span {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.16);
+    color: #e0e7ff !important;
+    padding: 7px 13px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.hero-box,
+.hero-box * {
+    color: white !important;
+}
+/* ============================================================
+   HERO TEXT VISIBILITY
+   ============================================================ */
+
+.hero-box {
+    background: linear-gradient(
+        135deg,
+        #111827 0%,
+        #312e81 55%,
+        #4338ca 100%
+    ) !important;
+
+    padding: 38px 42px;
+    border-radius: 24px;
+    color: white !important;
+    margin-bottom: 28px;
+
+    box-shadow:
+        0 15px 35px rgba(49, 46, 129, 0.18);
+
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-title {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+    color: white !important;
+}
+
+.hero-tagline {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #c7d2fe !important;
+    margin-bottom: 12px;
+}
+
+.hero-text {
+    color: #dbeafe !important;
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 780px;
 }
 
 .hero-features span {
@@ -863,12 +965,10 @@ if page == "📷 Package Scanner":
 
         try:
 
-            report = generate_evidence_report(
-                medicine_name
-                if medicine_name != "Not identified"
-                else None,
-                package_details=package_details,
-            )
+           report = generate_evidence_report(
+         medicine_name=ocr_medicine if ocr_medicine else None,
+         package_details=package_details,
+         )
 
         except Exception as e:
 

@@ -2,6 +2,7 @@ import re
 import os
 import shutil
 import pytesseract
+
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 from difflib import SequenceMatcher
 
@@ -11,8 +12,11 @@ from difflib import SequenceMatcher
 # ============================================================
 
 def configure_tesseract():
-    # 1. Check system PATH first (Linux / Streamlit Cloud)
+
+    # 1. Check system PATH first
+    #    This is what Streamlit Cloud will normally use.
     tesseract_in_path = shutil.which("tesseract")
+
     if tesseract_in_path:
         pytesseract.pytesseract.tesseract_cmd = tesseract_in_path
         return
@@ -21,7 +25,9 @@ def configure_tesseract():
     windows_paths = [
         r"C:\Program Files\Tesseract-OCR\tesseract.exe",
         r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
-        os.path.expanduser(r"~\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"),
+        os.path.expanduser(
+            r"~\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
+        ),
     ]
 
     for path in windows_paths:
@@ -29,23 +35,21 @@ def configure_tesseract():
             pytesseract.pytesseract.tesseract_cmd = path
             return
 
+
 configure_tesseract()
 
 
 # ============================================================
-# OCR TEXT EXTRACTION
+# IMAGE PREPROCESSING
 # ============================================================
 
-def extract_text(image):
-    """
-    Preprocess image and extract text using Tesseract.
-    """
+def preprocess_image(image):
 
     image = image.convert("RGB")
 
     width, height = image.size
 
-    # Upscale image using non-deprecated resample filter
+    # Upscale image
     try:
         resample_filter = Image.Resampling.LANCZOS
     except AttributeError:
@@ -60,22 +64,67 @@ def extract_text(image):
     image = ImageOps.grayscale(image)
 
     # Improve contrast
-    image = ImageEnhance.Contrast(image).enhance(2)
+    image = ImageEnhance.Contrast(image).enhance(2.2)
+
+    # Improve sharpness
+    image = ImageEnhance.Sharpness(image).enhance(2)
 
     # Sharpen
     image = image.filter(ImageFilter.SHARPEN)
 
-    # OCR
-    text = pytesseract.image_to_string(
-        image,
-        config="--psm 6"
+    return image
+
+
+# ============================================================
+# OCR TEXT EXTRACTION
+# ============================================================
+
+def extract_text(image):
+
+    """
+    Extract text using multiple Tesseract page segmentation modes.
+
+    Using more than one OCR pass helps when medicine names are
+    printed in unusual layouts or broken into multiple pieces.
+    """
+
+    processed_image = preprocess_image(image)
+
+    ocr_results = []
+
+    configs = [
+        "--psm 6",
+        "--psm 11",
+    ]
+
+    for config in configs:
+
+        try:
+
+            text = pytesseract.image_to_string(
+                processed_image,
+                config=config
+            )
+
+            if text:
+                ocr_results.append(text)
+
+        except Exception as e:
+
+            print(
+                "OCR ERROR:",
+                str(e)
+            )
+
+    combined_text = "\n".join(
+        ocr_results
     )
 
     print("========== OCR RESULT ==========")
-    print(repr(text))
+    print(repr(combined_text))
     print("================================")
 
-    return text.strip()
+    return combined_text.strip()
 
 
 # ============================================================
@@ -83,6 +132,7 @@ def extract_text(image):
 # ============================================================
 
 def normalize_text(text):
+
     """
     Converts OCR text into a comparison-friendly format.
     """
@@ -92,11 +142,15 @@ def normalize_text(text):
 
     text = str(text).lower()
 
-    # Remove common OCR separators
+    # Common OCR separators
     text = text.replace("|", " ")
     text = text.replace("_", " ")
 
-    # Keep only letters, numbers and spaces
+    # Normalize dash characters
+    text = text.replace("–", "-")
+    text = text.replace("—", "-")
+
+    # Keep letters, numbers and spaces
     text = re.sub(
         r"[^a-z0-9]+",
         " ",
@@ -118,15 +172,18 @@ def normalize_text(text):
 # ============================================================
 
 def normalize_field(value):
+
     """
     Useful for comparing OCR values with CSV values.
 
     Example:
-        DEMO-LIC-031
-        demo lic 031
+
+        DEMO-LIC-050
+        demo lic 050
 
     Both become:
-        demolic031
+
+        demolic050
     """
 
     if value is None:
@@ -140,184 +197,469 @@ def normalize_field(value):
 
 
 # ============================================================
+# COMPACT TEXT
+# ============================================================
+
+def compact_text(value):
+
+    """
+    Removes all spaces and special characters.
+
+    Example:
+
+        AM Ox! Cc | LLI N
+
+    becomes approximately:
+
+        amoxccllin
+    """
+
+    if value is None:
+        return ""
+
+    return re.sub(
+        r"[^a-z0-9]",
+        "",
+        str(value).lower()
+    )
+
+
+# ============================================================
+# STRING SIMILARITY
+# ============================================================
+
+def similarity_score(value1, value2):
+
+    value1 = compact_text(value1)
+    value2 = compact_text(value2)
+
+    if not value1 or not value2:
+        return 0.0
+
+    return SequenceMatcher(
+        None,
+        value1,
+        value2
+    ).ratio()
+
+
+# ============================================================
 # MEDICINE IDENTIFICATION
 # ============================================================
 
-def identify_medicine(ocr_text, medicines):
+def identify_medicine(text, medicines_df):
 
-    text = normalize_text(ocr_text)
+    """
+    
+    Robust medicine identification from noisy OCR.
 
-    if (
-        not text
-        or medicines is None
-        or "medicine" not in medicines.columns
-    ):
+    Handles OCR like:
+        AM Ox! Cc | LLI N Batch No: AC250318
+
+    and matches it against:
+        Amoxicillin
+    """
+
+    import re
+    from difflib import SequenceMatcher
+
+    print("\n========== MEDICINE MATCHING ==========")
+
+    if text is None or not str(text).strip():
+        print("OCR TEXT EMPTY")
+        print("====================================")
         return None
 
-    print("========== MEDICINE MATCHING ==========")
+    if medicines_df is None or medicines_df.empty:
+        print("MEDICINE DATABASE EMPTY")
+        print("====================================")
+        return None
+
+    # ---------------------------------------------------------
+    # 1. Find medicine column
+    # ---------------------------------------------------------
+
+    medicine_column = None
+
+    for col in medicines_df.columns:
+        if str(col).strip().lower() == "medicine":
+            medicine_column = col
+            break
+
+    if medicine_column is None:
+        print("NO 'medicine' COLUMN FOUND")
+        print("====================================")
+        return None
+
+    # ---------------------------------------------------------
+    # 2. Normalization helpers
+    # ---------------------------------------------------------
+
+    def normalize(value):
+        if value is None:
+            return ""
+
+        value = str(value).lower()
+
+        # OCR punctuation -> spaces
+        value = re.sub(r"[^a-z0-9]+", " ", value)
+
+        # Remove extra spaces
+        value = re.sub(r"\s+", " ", value).strip()
+
+        return value
+
+    def compact(value):
+        return re.sub(r"[^a-z0-9]", "", str(value).lower())
+
+    def similarity(a, b):
+        return SequenceMatcher(
+            None,
+            compact(a),
+            compact(b)
+        ).ratio()
+
+    # ---------------------------------------------------------
+    # 3. Prepare medicine database
+    # ---------------------------------------------------------
+
+    medicines = []
+
+    for value in medicines_df[medicine_column].dropna():
+        medicine = str(value).strip()
+
+        if not medicine:
+            continue
+
+        medicines.append({
+            "original": medicine,
+            "normalized": normalize(medicine),
+            "compact": compact(medicine)
+        })
+
+    if not medicines:
+        print("NO MEDICINES FOUND IN CSV")
+        print("====================================")
+        return None
+
+    # ---------------------------------------------------------
+    # 4. Print normalized OCR
+    # ---------------------------------------------------------
+
+    normalized_full = normalize(text)
+
     print("OCR NORMALIZED:")
-    print(text)
+    print(normalized_full)
 
-    # Remove spaces completely.
-    # This helps with OCR such as:
-    #
-    # ROSUVASTATI N
-    #
-    # becoming:
-    #
-    # rosuvastatin
+    # ---------------------------------------------------------
+    # 5. Exact matching against complete OCR
+    # ---------------------------------------------------------
 
-    compact_text = re.sub(
-        r"[^a-z0-9]",
-        "",
-        text
-    )
+    for med in medicines:
 
-    candidates = []
+        if med["normalized"] in normalized_full:
+            print("EXACT MATCH:", med["original"])
+            print("====================================")
+            return med["original"]
 
-    for medicine in medicines["medicine"].dropna():
+    # ---------------------------------------------------------
+    # 6. Compact exact matching
+    # ---------------------------------------------------------
 
-        original_name = str(medicine).strip()
+    compact_ocr = compact(text)
 
-        if not original_name:
+    for med in medicines:
+
+        if med["compact"] in compact_ocr:
+            print("COMPACT EXACT MATCH:", med["original"])
+            print("====================================")
+            return med["original"]
+
+    # ---------------------------------------------------------
+    # 7. Extract ONLY relevant OCR lines
+    # ---------------------------------------------------------
+
+    raw_lines = str(text).splitlines()
+
+    relevant_lines = []
+
+    ignored_keywords = [
+        "manufacturer",
+        "mfg",
+        "exp",
+        "expiry",
+        "mrp",
+        "licence",
+        "license",
+        "batch",
+        "batch no",
+        "manufactured",
+        "marketed by"
+    ]
+
+    for line in raw_lines:
+
+        line = line.strip()
+
+        if not line:
             continue
 
-        normalized_name = normalize_text(
-            original_name
+        lower_line = line.lower()
+
+        # -----------------------------------------------------
+        # Important:
+        # If medicine and Batch are on SAME line,
+        # keep everything BEFORE "Batch".
+        # -----------------------------------------------------
+
+        batch_match = re.search(
+            r"\b(?:batch\s*(?:no|number)?|lot\s*(?:no|number)?)\b",
+            lower_line
         )
 
-        compact_name = re.sub(
-            r"[^a-z0-9]",
-            "",
-            normalized_name
-        )
+        if batch_match:
+            line = line[:batch_match.start()].strip()
+            lower_line = line.lower()
 
-        if compact_name:
-            candidates.append(
-                (
-                    original_name,
-                    normalized_name,
-                    compact_name
-                )
-            )
-
-    # Try longer names first
-    candidates.sort(
-        key=lambda x: len(x[2]),
-        reverse=True
-    )
-
-    # --------------------------------------------------------
-    # METHOD 1: NORMAL EXACT MATCH
-    # --------------------------------------------------------
-
-    for (
-        original_name,
-        normalized_name,
-        compact_name
-    ) in candidates:
-
-        pattern = (
-            r"\b"
-            + re.escape(normalized_name)
-            + r"\b"
-        )
-
-        if re.search(
-            pattern,
-            text
-        ):
-
-            print(
-                "MATCH FOUND:",
-                original_name
-            )
-
-            return original_name
-
-    # --------------------------------------------------------
-    # METHOD 2: REMOVE OCR SPACES
-    # --------------------------------------------------------
-
-    for (
-        original_name,
-        normalized_name,
-        compact_name
-    ) in candidates:
-
-        if compact_name in compact_text:
-
-            print(
-                "MATCH FOUND AFTER "
-                "REMOVING OCR SPACES:",
-                original_name
-            )
-
-            return original_name
-
-    # --------------------------------------------------------
-    # METHOD 3: FUZZY MATCH
-    # --------------------------------------------------------
-
-    for (
-        original_name,
-        normalized_name,
-        compact_name
-    ) in candidates:
-
-        medicine_length = len(
-            compact_name
-        )
-
-        # Avoid matching extremely short names
-        if medicine_length < 4:
+        if not line:
             continue
 
-        min_len = max(
-            4,
-            medicine_length - 2
-        )
+        # Ignore metadata lines
+        if any(keyword in lower_line for keyword in ignored_keywords):
+            continue
 
-        max_len = (
-            medicine_length + 2
-        )
+        relevant_lines.append(line)
 
-        for length in range(
-            min_len,
-            max_len + 1
-        ):
+    print("\nRELEVANT OCR LINES:")
+    for line in relevant_lines:
+        print(repr(line))
+
+    # ---------------------------------------------------------
+    # 8. Create OCR tokens
+    # ---------------------------------------------------------
+
+    candidate_tokens = []
+
+    for line in relevant_lines:
+
+        # Keep alphabetic chunks
+        tokens = re.findall(r"[A-Za-z]+", line)
+
+        for token in tokens:
+
+            token = token.lower().strip()
+
+            if not token:
+                continue
+
+            candidate_tokens.append(token)
+
+    print("\nMEDICINE CANDIDATE TOKENS:")
+    print(candidate_tokens)
+
+    # ---------------------------------------------------------
+    # 9. Remove obvious non-medicine OCR garbage
+    # ---------------------------------------------------------
+
+    garbage = {
+        "tablets",
+        "tablet",
+        "capsules",
+        "capsule",
+        "mg",
+        "ml",
+        "g",
+        "kg",
+        "usp",
+        "ip",
+        "bp",
+        "for",
+        "oral",
+        "use",
+        "only",
+        "each",
+        "contains",
+        "film",
+        "coated",
+        "composition",
+        "strength"
+    }
+
+    candidate_tokens = [
+        token
+        for token in candidate_tokens
+        if token not in garbage
+    ]
+
+    # ---------------------------------------------------------
+    # 10. Generate joined OCR candidates
+    #
+    # AM + Ox + Cc + LLI + N
+    #
+    # becomes:
+    # amoxccllin
+    #
+    # which can then be fuzzy matched against:
+    # amoxicillin
+    # ---------------------------------------------------------
+
+    joined_candidates = []
+
+    # Individual tokens
+    for token in candidate_tokens:
+        if len(token) >= 2:
+            joined_candidates.append(token)
+
+    # Consecutive token combinations
+    max_window = min(7, len(candidate_tokens))
+
+    for window in range(2, max_window + 1):
+
+        for i in range(len(candidate_tokens) - window + 1):
+
+            chunk = candidate_tokens[i:i + window]
+
+            joined = "".join(chunk)
+
+            if len(joined) >= 4:
+                joined_candidates.append(joined)
+
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_candidates = []
+
+    for candidate in joined_candidates:
+
+        if candidate not in seen:
+            seen.add(candidate)
+            unique_candidates.append(candidate)
+
+    joined_candidates = unique_candidates
+
+    print("\nJOINED OCR CANDIDATES:")
+    print(joined_candidates)
+
+    # ---------------------------------------------------------
+    # 11. Fuzzy matching
+    # ---------------------------------------------------------
+
+    best_medicine = None
+    best_candidate = None
+    best_score = 0.0
+
+    for candidate in joined_candidates:
+
+        for med in medicines:
+
+            score = similarity(candidate, med["compact"])
+
+            if score > best_score:
+
+                best_score = score
+                best_medicine = med["original"]
+                best_candidate = candidate
+
+    print("\nBEST JOINED MATCH:")
+    print(best_candidate)
+
+    print("BEST MEDICINE:")
+    print(best_medicine)
+
+    print("BEST SCORE:")
+    print(round(best_score, 4))
+
+    # ---------------------------------------------------------
+    # 12. Normal fuzzy threshold
+    # ---------------------------------------------------------
+
+    threshold = 0.68
+
+    print("THRESHOLD:")
+    print(threshold)
+
+    if best_medicine and best_score >= threshold:
+
+        print("\nFINAL FUZZY MATCH:")
+        print(best_medicine)
+
+        print("====================================")
+
+        return best_medicine
+
+    # ---------------------------------------------------------
+    # 13. Character-window fallback
+    #
+    # Useful if OCR inserted spaces/punctuation badly.
+    # ---------------------------------------------------------
+
+    print("\nFINAL FUZZY MATCH:")
+    print("NONE")
+
+    best_window_medicine = None
+    best_window_score = 0.0
+    best_window = None
+
+    compact_text = compact(text)
+
+    for med in medicines:
+
+        target = med["compact"]
+
+        if len(target) < 4:
+            continue
+
+        window_length = len(target)
+
+        # Search around the target length
+        for extra in range(-2, 3):
+
+            current_length = window_length + extra
+
+            if current_length < 4:
+                continue
 
             for i in range(
                 0,
-                len(compact_text) - length + 1
+                max(0, len(compact_text) - current_length + 1)
             ):
 
-                chunk = compact_text[
-                    i:i + length
+                window = compact_text[
+                    i:i + current_length
                 ]
 
                 score = SequenceMatcher(
                     None,
-                    compact_name,
-                    chunk
+                    window,
+                    target
                 ).ratio()
 
-                if score >= 0.90:
+                if score > best_window_score:
 
-                    print(
-                        "FUZZY MATCH:",
-                        original_name,
-                        "score:",
-                        round(score, 3)
-                    )
+                    best_window_score = score
+                    best_window_medicine = med["original"]
+                    best_window = window
 
-                    return original_name
+    print("\nWINDOW FALLBACK:")
+    print("BEST WINDOW:", best_window)
+    print("BEST MEDICINE:", best_window_medicine)
+    print("BEST SCORE:", round(best_window_score, 4))
 
-    print("NO MEDICINE MATCH FOUND")
+    if (
+        best_window_medicine
+        and best_window_score >= 0.72
+    ):
+
+        print("\nFINAL WINDOW MATCH:")
+        print(best_window_medicine)
+
+        print("====================================")
+
+        return best_window_medicine
+
+    print("\nNO MEDICINE MATCH FOUND")
     print("====================================")
 
     return None
-
 
 # ============================================================
 # PACKAGE DETAIL EXTRACTION
@@ -330,44 +672,31 @@ def extract_package_details(ocr_text):
     )
 
     details = {
-
         "medicine": None,
-
         "strength": None,
-
         "manufacturer": None,
-
         "batch_number": None,
-
         "manufacturing_date": None,
-
         "expiry_date": None,
-
         "mrp": None,
-
         "licence_number": None,
-
         "raw_text": ocr_text
     }
 
     if not text:
         return details
 
-
     # ========================================================
     # STRENGTH
     # ========================================================
 
     strength_match = re.search(
-
         r"\b"
         r"\d+(?:\.\d+)?"
         r"\s*"
         r"(?:mg|mcg|g|ml|iu)"
         r"\b",
-
         text,
-
         re.IGNORECASE
     )
 
@@ -379,9 +708,8 @@ def extract_package_details(ocr_text):
             .strip()
         )
 
-
     # ========================================================
-    # MANUFACTURER
+    # RAW OCR LINES
     # ========================================================
 
     raw_lines = str(
@@ -402,54 +730,46 @@ def extract_package_details(ocr_text):
             line
         )
 
-
-    manufacturer_found = False
+    # ========================================================
+    # MANUFACTURER
+    # ========================================================
 
     for i, line in enumerate(
         cleaned_lines
     ):
 
         manufacturer_match = re.search(
-
             r"\bmanufacturer\b"
             r"\s*[:\-]?\s*(.*)",
-
             line,
-
             re.IGNORECASE
         )
 
         if not manufacturer_match:
             continue
 
-
         manufacturer_parts = []
 
-
-        # Text after "Manufacturer:"
         first_part = (
             manufacturer_match
             .group(1)
             .strip()
         )
 
-        # Remove OCR garbage at end
+        # Remove trailing OCR garbage
         first_part = re.sub(
             r"[\|\!\_]+$",
             "",
             first_part
         ).strip()
 
-
         if first_part:
-
             manufacturer_parts.append(
                 first_part
             )
 
-
         # ----------------------------------------------------
-        # Collect continuation lines
+        # Continuation lines
         # ----------------------------------------------------
 
         j = i + 1
@@ -463,15 +783,11 @@ def extract_package_details(ocr_text):
                 .strip()
             )
 
-
-            # Blank line = manufacturer section ended
             if not next_line:
                 break
 
-
             # Stop at another package field
             if re.search(
-
                 r"\b(?:"
                 r"batch"
                 r"|b\.?\s*no"
@@ -487,22 +803,16 @@ def extract_package_details(ocr_text):
                 r"|license"
                 r"|lic"
                 r")\b",
-
                 next_line,
-
                 re.IGNORECASE
             ):
-
                 break
 
-
-            # Add continuation line
             manufacturer_parts.append(
                 next_line
             )
 
             j += 1
-
 
         if manufacturer_parts:
 
@@ -510,9 +820,8 @@ def extract_package_details(ocr_text):
                 manufacturer_parts
             )
 
-            # Remove OCR garbage
             manufacturer = re.sub(
-                r"[^A-Za-z0-9.&,+()'\/\- ]",
+                r"[^A-Za-z0-9.&,+()'/\- ]",
                 "",
                 manufacturer
             )
@@ -523,64 +832,51 @@ def extract_package_details(ocr_text):
                 manufacturer
             ).strip()
 
-
             details[
                 "manufacturer"
             ] = manufacturer
 
-            manufacturer_found = True
-
             break
-
 
     # ========================================================
     # BATCH NUMBER
     # ========================================================
 
     batch_match = re.search(
-
         r"(?:"
         r"batch\s*(?:no|number)?"
         r"|b\.?\s*no\.?"
         r")"
         r"\s*[:\-]?\s*"
         r"([a-z0-9][a-z0-9\/\-]*)",
-
         text,
-
         re.IGNORECASE
     )
 
     if batch_match:
 
-        batch_number = (
+        details[
+            "batch_number"
+        ] = (
             batch_match
             .group(1)
             .strip()
         )
-
-        details[
-            "batch_number"
-        ] = batch_number
-
 
     # ========================================================
     # MRP
     # ========================================================
 
     mrp_match = re.search(
-
         r"(?:"
         r"mrp"
-        r"|m\.r\.p\.?"
+        r"|m\.?r\.?p\.?"
         r")"
         r"\s*"
-        r"(?:rs\.?|₹)?"
+        r"(?:rs\.?|₹|\$)?"
         r"\s*"
         r"([0-9]+(?:\.[0-9]+)?)",
-
         text,
-
         re.IGNORECASE
     )
 
@@ -599,25 +895,20 @@ def extract_package_details(ocr_text):
             )
 
             if mrp_value.is_integer():
-
                 mrp = str(
                     int(mrp_value)
                 )
 
         except ValueError:
-
             pass
 
-
         details["mrp"] = mrp
-
 
     # ========================================================
     # MANUFACTURING DATE
     # ========================================================
 
     mfg_match = re.search(
-
         r"(?:"
         r"mfg"
         r"|mfd"
@@ -627,12 +918,10 @@ def extract_package_details(ocr_text):
         r"\s*[:\-]?\s*"
         r"(\d{1,2})"
         r"\s*"
-        r"[\s\/\-]"
+        r"[\/\-\s]"
         r"\s*"
         r"(\d{4})",
-
         text,
-
         re.IGNORECASE
     )
 
@@ -643,8 +932,7 @@ def extract_package_details(ocr_text):
         )
 
         year = (
-            mfg_match
-            .group(2)
+            mfg_match.group(2)
         )
 
         if 1 <= month <= 12:
@@ -655,13 +943,11 @@ def extract_package_details(ocr_text):
                 f"{month:02d}/{year}"
             )
 
-
     # ========================================================
     # EXPIRY DATE
     # ========================================================
 
     expiry_match = re.search(
-
         r"(?:"
         r"exp"
         r"|expiry"
@@ -671,12 +957,10 @@ def extract_package_details(ocr_text):
         r"\s*[:\-]?\s*"
         r"(\d{1,2})"
         r"\s*"
-        r"[\s\/\-]"
+        r"[\/\-\s]"
         r"\s*"
         r"(\d{4})",
-
         text,
-
         re.IGNORECASE
     )
 
@@ -687,8 +971,7 @@ def extract_package_details(ocr_text):
         )
 
         year = (
-            expiry_match
-            .group(2)
+            expiry_match.group(2)
         )
 
         if 1 <= month <= 12:
@@ -699,13 +982,11 @@ def extract_package_details(ocr_text):
                 f"{month:02d}/{year}"
             )
 
-
     # ========================================================
     # LICENCE NUMBER
     # ========================================================
 
     licence_match = re.search(
-
         r"(?:"
         r"licence"
         r"|license"
@@ -715,9 +996,7 @@ def extract_package_details(ocr_text):
         r"(?:no|number)?"
         r"\s*[:\-]?\s*"
         r"([a-z0-9][a-z0-9\/\-\s]*)",
-
         text,
-
         re.IGNORECASE
     )
 
@@ -729,8 +1008,8 @@ def extract_package_details(ocr_text):
             .strip()
         )
 
+        # Stop at another known package field
         licence_number = re.split(
-
             r"\s+"
             r"(?:"
             r"manufacturer"
@@ -743,19 +1022,14 @@ def extract_package_details(ocr_text):
             r"|mrp"
             r")"
             r"\b",
-
             licence_number,
-
             maxsplit=1,
-
             flags=re.IGNORECASE
         )[0].strip()
-
 
         details[
             "licence_number"
         ] = licence_number
-
 
     return details
 
@@ -774,7 +1048,7 @@ def analyze_package(
         image
     )
 
-    # Step 2: Extract package fields
+    # Step 2: Extract package details
     package_details = (
         extract_package_details(
             ocr_text
