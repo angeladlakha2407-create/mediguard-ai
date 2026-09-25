@@ -1,0 +1,50 @@
+medicine,category,uses,warnings,side effects,active ingredient,strength,manufacturer
+Paracetamol,Analgesic/Antipyretic,Fever and mild to moderate pain,Use carefully in liver disease,"Nausea, dizziness",Paracetamol,650 mg,Micro Labs
+Dolo 650,Analgesic/Antipyretic,Fever and mild to moderate pain,Use carefully in liver disease,"Nausea, dizziness",Paracetamol,650 mg,Micro Labs
+Crocin,Analgesic/Antipyretic,Fever and mild to moderate pain,Use carefully in liver disease,"Nausea, dizziness",Paracetamol,650 mg,GlaxoSmithKline
+Calpol,Analgesic/Antipyretic,Fever and mild to moderate pain,Use carefully in liver disease,"Nausea, dizziness",Paracetamol,500 mg,GlaxoSmithKline
+Aspirin,Analgesic/Antiplatelet,Pain and inflammation,Use cautiously with bleeding disorders,"Stomach irritation, nausea",Acetylsalicylic Acid,75 mg,Bayer
+Ibuprofen,NSAID,Pain inflammation and fever,Use cautiously with stomach ulcers or kidney problems,"Stomach irritation, nausea",Ibuprofen,400 mg,Abbott
+Diclofenac,NSAID,Pain and inflammation,Use cautiously with stomach or kidney problems,"Indigestion, stomach pain",Diclofenac,50 mg,Novartis
+Naproxen,NSAID,Pain and inflammation,Use cautiously with stomach or kidney problems,"Indigestion, nausea",Naproxen,250 mg,Abbott
+Cetirizine,Antihistamine,Allergy symptoms and itching,May cause drowsiness,"Drowsiness, dry mouth",Cetirizine Hydrochloride,10 mg,Dr Reddys Laboratories
+Levocetirizine,Antihistamine,Allergy symptoms and allergic rhinitis,May cause drowsiness,"Drowsiness, dry mouth",Levocetirizine,5 mg,Dr Reddys Laboratories
+Loratadine,Antihistamine,Allergy symptoms and allergic rhinitis,Use according to healthcare guidance,"Headache, drowsiness",Loratadine,10 mg,Sun Pharma
+Fexofenadine,Antihistamine,Allergy symptoms and allergic rhinitis,Use according to healthcare guidance,"Headache, nausea",Fexofenadine,120 mg,Sanofi
+Azithromycin,Antibiotic,Bacterial infections,Use only under medical supervision,"Nausea, diarrhea",Azithromycin,500 mg,Alkem Laboratories
+Amoxicillin,Antibiotic,Bacterial infections,Do not use if allergic to penicillin,"Nausea, diarrhea",Amoxicillin,500 mg,Cipla
+Cefixime,Antibiotic,Bacterial infections,Use only under medical supervision,"Diarrhea, nausea",Cefixime,200 mg,Abbott
+Doxycycline,Antibiotic,Bacterial infections,Use only under medical supervision,"Nausea, stomach upset",Doxycycline,100 mg,Sun Pharma
+Metformin,Antidiabetic,Type 2 diabetes,Use under medical supervision,"Nausea, diarrhea",Metformin,500 mg,Sun Pharma
+Glimepiride,Antidiabetic,Type 2 diabetes,May cause low blood sugar,"Dizziness, nausea",Glimepiride,1 mg,Sanofi
+Sitagliptin,Antidiabetic,Type 2 diabetes,Use under medical supervision,"Headache, nausea",Sitagliptin,100 mg,MSD
+Pantoprazole,Proton Pump Inhibitor,Acid reflux and excess stomach acid,Use under medical guidance for prolonged treatment,"Headache, diarrhea",Pantoprazole,40 mg,Sun Pharma
+Omeprazole,Proton Pump Inhibitor,Acid reflux and stomach ulcers,Use under medical guidance for prolonged treatment,"Headache, abdominal pain",Omeprazole,20 mg,Dr Reddys Laboratories
+Rabeprazole,Proton Pump Inhibitor,Acid reflux and stomach ulcers,Use under medical guidance for prolonged treatment,"Headache, nausea",Rabeprazole,20 mg,Sun Pharma
+Ondansetron,Antiemetic,Prevention of nausea and vomiting,Use under medical supervision,"Headache, constipation",Ondansetron,4 mg,Cipla
+Domperidone,Antiemetic,Nausea and vomiting,Use under medical supervision,"Dry mouth, headache",Domperidone,10 mg,Abbott
+ORS,Oral Rehydration,Replacement of fluids and electrolytes,Prepare according to package directions,"Nausea, bloating",Sodium Chloride + Potassium Chloride + Glucose,WHO Formula,Electral
+Vitamin B12,Vitamin Supplement,Vitamin B12 supplementation,Use according to healthcare guidance,"Mild nausea, headache",Cyanocobalamin,1000 mcg,Abbott
+Vitamin D3,Vitamin Supplement,Vitamin D supplementation,Avoid excessive intake,"Nausea, constipation",Cholecalciferol,60000 IU,Sun Pharma
+Calcium + Vitamin D3,Mineral/Vitamin Supplement,Calcium and vitamin D supplementation,Use cautiously in kidney disorders,"Constipation, stomach upset",Calcium Carbonate + Cholecalciferol,500 mg + 400 IU,Abbott
+Iron + Folic Acid,Mineral/Vitamin Supplement,Iron and folic acid supplementation,Use according to healthcare guidance,"Constipation, nausea",Ferrous Ascorbate + Folic Acid,100 mg + 1.5 mg,Intas Pharmaceuticals
+Atorvastatin,Statin,Cholesterol management,Use under medical supervision,"Muscle pain, headache",Atorvastatin,10 mg,Atorvastatin
+Rosuvastatin,Statin,Cholesterol management,Use under medical supervision,"Headache, muscle pain",Rosuvastatin,10 mg,AstraZeneca
+Amlodipine,Antihypertensive,High blood pressure and angina,Use under medical supervision,"Headache, ankle swelling",Amlodipine,5 mg,Dr Reddys Laboratories
+Losartan,Antihypertensive,High blood pressure,Use under medical supervision,"Dizziness, headache",Losartan,50 mg,Sun Pharma
+Telmisartan,Antihypertensive,High blood pressure,Use under medical supervision,"Dizziness, headache",Telmisartan,40 mg,Abbott
+Atenolol,Antihypertensive,High blood pressure and heart conditions,Use under medical supervision,"Dizziness, tiredness",Atenolol,50 mg,IPCA Laboratories
+Montelukast,Leukotriene Receptor Antagonist,Asthma and allergic rhinitis,Use under medical supervision,"Headache, abdominal pain",Montelukast,10 mg,Cipla
+Salbutamol,Bronchodilator,Relief of bronchospasm,Use according to medical guidance,"Tremor, headache",Salbutamol,4 mg,Cipla
+Budesonide,Corticosteroid,Asthma and respiratory conditions,Use under medical supervision,"Throat irritation, hoarseness",Budesonide,200 mcg,AstraZeneca
+Albendazole,Anthelmintic,Parasitic worm infections,Use according to healthcare guidance,"Abdominal pain, nausea",Albendazole,400 mg,GlaxoSmithKline
+Mebendazole,Anthelmintic,Parasitic worm infections,Use according to healthcare guidance,"Abdominal pain, diarrhea",Mebendazole,100 mg,Johnson and Johnson
+Acyclovir,Antiviral,Herpes virus infections,Use under medical supervision,"Nausea, headache",Acyclovir,400 mg,Cipla
+Fluconazole,Antifungal,Fungal infections,Use under medical supervision,"Nausea, headache",Fluconazole,150 mg,Cipla
+Clotrimazole,Antifungal,Fungal skin infections,For external use according to medical guidance,"Skin irritation, redness",Clotrimazole,1 percent,Bayer
+Hydrocortisone,Corticosteroid,Skin inflammation and irritation,Use according to healthcare guidance,"Skin irritation, dryness",Hydrocortisone,1 percent,Abbott
+Calamine,Topical Skin Preparation,Skin irritation and itching,For external use only,"Dryness, mild irritation",Calamine,8 percent,Ipca Laboratories
+Loperamide,Antidiarrheal,Relief of acute diarrhea,Use according to medical guidance,"Constipation, abdominal cramps",Loperamide,2 mg,Johnson and Johnson
+Bisacodyl,Laxative,Relief of occasional constipation,Use according to package directions,"Abdominal cramps, diarrhea",Bisacodyl,5 mg,Sanofi
+Levothyroxine,Thyroid Hormone,Thyroid hormone replacement,Use under medical supervision,"Headache, nervousness",Levothyroxine Sodium,50 mcg,Abbott
+Allopurinol,Antigout,Gout and high uric acid,Use under medical supervision,"Nausea, skin rash",Allopurinol,100 mg,GlaxoSmithKline

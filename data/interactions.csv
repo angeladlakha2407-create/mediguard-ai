@@ -1,0 +1,4 @@
+medicine_1,medicine_2,interaction,severity
+Aspirin,Metformin,May affect blood sugar control,Moderate
+Aspirin,Paracetamol,Potentially increased bleeding risk,Moderate
+Metformin,Paracetamol,No major interaction generally expected,Low

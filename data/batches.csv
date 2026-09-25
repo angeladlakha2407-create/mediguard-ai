@@ -1,0 +1,52 @@
+medicine,batch_number,manufacturing_date,expiry_date,mrp,licence_number,manufacturer
+Paracetamol,DEMO-PCM-001,01/2025,12/2027,25,DEMO-LIC-001,NorthVale Lifesciences Pvt. Ltd.
+Dolo 650,DEMO-DOL-001,02/2025,01/2028,35,DEMO-LIC-002,ArdentCare Pharmaceuticals Pvt. Ltd.
+Crocin,DEMO-CRO-001,01/2025,12/2027,30,Medora Lifesciences Pvt. Ltd.
+Calpol,DEMO-CAL-001,03/2025,02/2028,32,DEMO-LIC-004,Wellcrest Pharmaceuticals Pvt. Ltd.
+Aspirin,DEMO-ASP-001,01/2025,12/2027,20,DEMO-LIC-005,NorthVale Lifesciences Pvt. Ltd.
+Ibuprofen,DEMO-IBU-001,02/2025,01/2028,28,DEMO-LIC-006,ArdentCare Pharmaceuticals Pvt. Ltd.
+Diclofenac,DEMO-DIC-001,03/2025,02/2028,22,DEMO-LIC-007,Medora Lifesciences Pvt. Ltd.
+Naproxen,DEMO-NAP-001,01/2025,12/2027,30,DEMO-LIC-008,Wellcrest Pharmaceuticals Pvt. Ltd.
+Cetirizine,DEMO-CET-001,02/2025,01/2028,18,DEMO-LIC-009,NorthVale Lifesciences Pvt. Ltd.
+Levocetirizine,DEMO-LEV-001,03/2025,02/2028,24,DEMO-LIC-010,ArdentCare Pharmaceuticals Pvt. Ltd.
+Loratadine,DEMO-LOR-001,01/2025,12/2027,30,DEMO-LIC-011,Medora Lifesciences Pvt. Ltd.
+Fexofenadine,DEMO-FEX-001,02/2025,01/2028,45,DEMO-LIC-012,Wellcrest Pharmaceuticals Pvt. Ltd.
+Azithromycin,DEMO-AZI-001,03/2025,02/2028,65,DEMO-LIC-013,NorthVale Lifesciences Pvt. Ltd.
+Amoxicillin,DEMO-AMX-001,01/2025,12/2027,55,DEMO-LIC-014,Ardentvale Pharmaceuticals Pvt. Ltd.
+Cefixime,DEMO-CFX-001,02/2025,01/2028,70,DEMO-LIC-015,Medora Lifesciences Pvt. Ltd.
+Doxycycline,DEMO-DOX-001,03/2025,02/2028,48,DEMO-LIC-016,Wellcrest Pharmaceuticals Pvt. Ltd.
+Metformin,DEMO-MET-001,01/2025,12/2027,18,DEMO-LIC-017,NorthVale Lifesciences Pvt. Ltd.
+Glimepiride,DEMO-GLI-001,02/2025,01/2028,32,DEMO-LIC-018,ArdentCare Pharmaceuticals Pvt. Ltd.
+Sitagliptin,DEMO-SIT-001,03/2025,02/2028,95,DEMO-LIC-019,Medora Lifesciences Pvt. Ltd.
+Pantoprazole,DEMO-PAN-001,01/2025,12/2027,40,DEMO-LIC-020,Wellcrest Pharmaceuticals Pvt. Ltd.
+Omeprazole,DEMO-OME-001,02/2025,01/2028,35,DEMO-LIC-021,NorthVale Lifesciences Pvt. Ltd.
+Rabeprazole,DEMO-RAB-001,03/2025,02/2028,45,DEMO-LIC-022,ArdentCare Pharmaceuticals Pvt. Ltd.
+Ondansetron,DEMO-OND-001,01/2025,12/2027,30,DEMO-LIC-023,Medora Lifesciences Pvt. Ltd.
+Domperidone,DEMO-DOM-001,02/2025,01/2028,28,DEMO-LIC-024,Wellcrest Pharmaceuticals Pvt. Ltd.
+ORS,DEMO-ORS-001,03/2025,02/2028,25,DEMO-LIC-025,NorthVale Lifesciences Pvt. Ltd.
+Vitamin B12,DEMO-B12-001,01/2025,12/2027,45,DEMO-LIC-026,ArdentCare Pharmaceuticals Pvt. Ltd.
+Vitamin D3,DEMO-D3-001,02/2025,01/2028,60,DEMO-LIC-027,Medora Lifesciences Pvt. Ltd.
+Calcium + Vitamin D3,DEMO-CALD-001,03/2025,02/2028,75,DEMO-LIC-028,Wellcrest Pharmaceuticals Pvt. Ltd.
+Iron + Folic Acid,DEMO-IFA-001,01/2025,12/2027,55,DEMO-LIC-029,NorthVale Lifesciences Pvt. Ltd.
+Atorvastatin,DEMO-ATO-001,02/2025,01/2028,50,DEMO-LIC-030,ArdentCare Pharmaceuticals Pvt. Ltd.
+Rosuvastati n 10 mg,NVL240817,08/2025,07/2027,186,DEMO-LIC-031,NorthVale Lifesciences Pvt. Ltd.
+Amlodipine,DEMO-AML-001,01/2025,12/2027,25,DEMO-LIC-032,Medora Lifesciences Pvt. Ltd.
+Losartan,DEMO-LOS-001,02/2025,01/2028,45,DEMO-LIC-033,Wellcrest Pharmaceuticals Pvt. Ltd.
+Telmisartan,DEMO-TEL-001,03/2025,02/2028,50,DEMO-LIC-034,NorthVale Lifesciences Pvt. Ltd.
+Atenolol,DEMO-ATE-001,01/2025,12/2027,22,DEMO-LIC-035,ArdentCare Pharmaceuticals Pvt. Ltd.
+Montelukast,DEMO-MON-001,02/2025,01/2028,55,DEMO-LIC-036,Medora Lifesciences Pvt. Ltd.
+Salbutamol,DEMO-SAL-001,03/2025,02/2028,30,DEMO-LIC-037,Wellcrest Pharmaceuticals Pvt. Ltd.
+Budesonide,DEMO-BUD-001,01/2025,12/2027,110,DEMO-LIC-038,NorthVale Lifesciences Pvt. Ltd.
+Albendazole,DEMO-ALB-001,02/2025,01/2028,20,DEMO-LIC-039,ArdentCare Pharmaceuticals Pvt. Ltd.
+Mebendazole,DEMO-MEB-001,03/2025,02/2028,25,DEMO-LIC-040,Medora Lifesciences Pvt. Ltd.
+Acyclovir,DEMO-ACY-001,01/2025,12/2027,40,DEMO-LIC-041,Wellcrest Pharmaceuticals Pvt. Ltd.
+Fluconazole,DEMO-FLU-001,02/2025,01/2028,35,DEMO-LIC-042,NorthVale Lifesciences Pvt. Ltd.
+Clotrimazole,DEMO-CLO-001,03/2025,02/2028,30,DEMO-LIC-043,ArdentCare Pharmaceuticals Pvt. Ltd.
+Hydrocortisone,DEMO-HYD-001,01/2025,12/2027,28,DEMO-LIC-044,Medora Lifesciences Pvt. Ltd.
+Calamine,DEMO-CAL-002,02/2025,01/2028,35,DEMO-LIC-045,Wellcrest Pharmaceuticals Pvt. Ltd.
+Loperamide,DEMO-LOP-001,03/2025,02/2028,32,DEMO-LIC-046,NorthVale Lifesciences Pvt. Ltd.
+Bisacodyl,DEMO-BIS-001,01/2025,12/2027,25,DEMO-LIC-047,ArdentCare Pharmaceuticals Pvt. Ltd.
+Levothyroxine,DEMO-LEVX-001,02/2025,01/2028,40,DEMO-LIC-048,Medora Lifesciences Pvt. Ltd.
+Allopurinol,DEMO-ALL-001,03/2025,02/2028,30,DEMO-LIC-049,Wellcrest Pharmaceuticals Pvt. Ltd.
+Amoxiclav 625 mg,AVP250324,03/2025,02/2027,186,DEMO-LIC-050,NorthVale Lifesciences Pvt. Ltd.
+Amoxicillin,ac250318,03/2025,02/2027,55,DEMO-LIC-050,NorthVale Lifesciences Pvt. Ltd.
